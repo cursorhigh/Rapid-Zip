@@ -1,123 +1,173 @@
-# 🧮 **Lossy Image Compression using Mathematics & DSA**
+## 🧮 **Lossy Image Compression using Mathematics & DSA**
 
 ### **1. Problem Statement**
 
-PNG images, though lossless, often store redundant information and occupy excessive storage.
-This project aims to develop a **custom lossy image compression system** that leverages **mathematical transforms (DCT)** and **data structures (Huffman tree, RLE arrays)** to achieve high compression ratios with minimal perceptual quality loss.
+High-resolution PNG images often store redundant information, leading to large file sizes.
+This project implements a **custom lossy compression algorithm** that uses **mathematical transforms (DCT)** and **data structures (Heap, HashMap, Arrays)** to reduce size while retaining visual quality.
 
 ---
 
 ### **2. Objective**
 
-* Design a compression model grounded in math and algorithms.
-* Implement transform-based encoding (DCT + Quantization).
-* Use DSA-driven entropy coding (Heap-based Huffman).
-* Evaluate performance via compression ratio and PSNR.
+* Develop a **transform + entropy-based** image compression pipeline.
+* Apply **Discrete Cosine Transform (DCT)** and **Quantization** to minimize redundancy.
+* Implement **Heap-based Huffman Encoding** for entropy compression.
+* Measure results using **Compression Ratio** and **PSNR (Peak Signal-to-Noise Ratio)**.
 
 ---
 
-### **3. Core Concept**
+### **3. Workflow Overview**
 
-Compression is achieved by **transforming** pixel data into a frequency domain, **quantizing** coefficients, and **encoding** efficiently.
-
-#### **Pipeline**
+#### 🧩 **Compression Flow**
 
 ```
-Input PNG
- → Color Space Conversion (RGB → YCbCr)
- → 8×8 Block Division
- → Discrete Cosine Transform (DCT)
- → Quantization (Loss Introduction)
- → Zig-Zag Scanning
- → Run-Length Encoding (RLE)
- → Huffman Coding (using Heap)
- → Compressed File (.mcmp)
+Input Image (.png)
+→ RGB → YCbCr Conversion
+→ 8×8 Block Division
+→ Discrete Cosine Transform (DCT)
+→ Quantization (Loss Introduction)
+→ Zig-Zag Scan
+→ Run-Length Encoding (RLE)
+→ Huffman Coding (Heap-based)
+→ Output: .mcmp2 (Compressed File)
 ```
 
-Decompression reverses the same steps.
+#### 🧩 **Decompression Flow**
+
+```
+.mcmp2 File
+→ Huffman Decoding
+→ RLE Decoding
+→ Inverse Zig-Zag
+→ Dequantization
+→ Inverse DCT
+→ Output Image (.png)
+```
 
 ---
 
-### **4. Mathematical Foundation**
+### **4. Mathematical Concepts**
 
-![alt text](image.png)
+| Concept                             | Description                                                                                                                       |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **DCT (Discrete Cosine Transform)** | Converts spatial pixel data into frequency coefficients. High frequencies represent fine detail (discarded in lossy compression). |
+| **Quantization**                    | Reduces precision of frequency coefficients → introduces controlled loss.                                                         |
+| **RLE (Run-Length Encoding)**       | Compresses long sequences of zeros from zig-zag ordered blocks.                                                                   |
+| **Huffman Coding**                  | Builds optimal prefix codes using a **min-heap**, minimizing bit-length for frequent symbols.                                     |
 
+#### ✳️ Formula (2D DCT)
 
-
-#### **Entropy Coding**
-
-* **Run-Length Encoding (RLE)**: compresses zeros from zig-zag order.
-* **Huffman Coding**: minimizes bit usage based on frequency using a min-heap.
+[
+F(u,v) = \frac{1}{4} C(u)C(v) \sum_{x=0}^{7}\sum_{y=0}^{7} f(x,y)
+\cos\left[\frac{(2x+1)u\pi}{16}\right]\cos\left[\frac{(2y+1)v\pi}{16}\right]
+]
+Where
+( C(u) = \frac{1}{\sqrt{2}} ) if ( u = 0 ), else 1.
 
 ---
 
 ### **5. Data Structures Used**
 
-| Component        | Data Structure         | Purpose                         |
-| ---------------- | ---------------------- | ------------------------------- |
-| Huffman Encoding | Min-Heap / Binary Tree | Build optimal prefix codes      |
-| Pixel Blocks     | 2D Arrays              | Store 8×8 matrices              |
-| Zig-Zag Map      | Static Array           | Deterministic coefficient order |
-| Symbol Map       | Hash Map               | Frequency & code lookup         |
+| Component        | Data Structure             | Purpose                        |
+| ---------------- | -------------------------- | ------------------------------ |
+| Huffman Coding   | **Min-Heap / Binary Tree** | Build optimal codewords        |
+| RLE              | **Array**                  | Store and compress zero runs   |
+| Zig-Zag Order    | **Static Lookup Table**    | Traverse 8×8 block efficiently |
+| Symbol Frequency | **HashMap (dict)**         | Store symbol → frequency pairs |
 
 ---
 
-### **6. Algorithm Overview**
+### **6. Algorithmic Summary**
 
-**Compression**
+**Compression:**
 
 ```pseudo
 for each 8x8 block:
     dct = DCT(block)
-    q = quantize(dct)
-    zz = zigzag(q)
-    rle = run_length(zz)
-    encoded += rle
-huffman_tree = build_huffman(encoded)
-bitstream = huffman_encode(encoded, huffman_tree)
-save(bitstream, huffman_tree)
+    q = Quantize(dct)
+    zz = ZigZag(q)
+    rle = RunLengthEncode(zz)
+append all rle blocks
+tree = BuildHuffmanTree(rle)
+encoded = HuffmanEncode(rle, tree)
+save(encoded, tree)
 ```
 
-**Decompression**
+**Decompression:**
 
 ```pseudo
-data = huffman_decode(bitstream, tree)
-for each block_data:
-    zz = run_length_decode(block_data)
-    q = inverse_zigzag(zz)
-    dct = dequantize(q)
-    block = inverse_DCT(dct)
-reconstruct_image(blocks)
+rle = HuffmanDecode(bitstream, tree)
+for each block:
+    q = InverseZigZag(rle)
+    dct = Dequantize(q)
+    block = InverseDCT(dct)
+combine blocks → image
 ```
 
 ---
 
-### **7. Evaluation Metrics**
+### **7. Tech Stack**
 
-![alt text](image-1.png)
----
-
-### **8. Implementation Summary**
-
-| Layer          | Tool                    |
-| -------------- | ----------------------- |
-| Language       | Python                  |
-| Libraries      | NumPy, Pillow, heapq    |
-| Output         | `.mcmp` compressed file |
-| GUI (optional) | Streamlit / Tkinter     |
+| Layer                   | Tools / Libraries                            |
+| ----------------------- | -------------------------------------------- |
+| Language                | Python 3.x                                   |
+| Framework               | Django                                       |
+| Math & Image Processing | NumPy, SciPy, Pillow                         |
+| Entropy & DSA           | `heapq`, `collections`, RLE Arrays           |
+| Frontend                | TailwindCSS, Alpine.js                       |
+| Database                | SQLite3                                      |
+| Output Format           | `.mcmp2` custom file (base + zlib residuals) |
 
 ---
 
-### **9. Results (Example)**
+### **8. Workflow Implementation (Django App)**
 
-| File       | Original | Compressed | Ratio | PSNR  |
-| ---------- | -------- | ---------- | ----- | ----- |
-| image1.png | 2.4 MB   | 210 KB     | 11.4× | 34 dB |
+| Stage              | Description                                                             |
+| ------------------ | ----------------------------------------------------------------------- |
+| `/api/compress/`   | Accepts PNG/JPG → compresses using DCT pipeline → returns `.mcmp2` file |
+| `/api/decompress/` | Accepts `.mcmp2` → reconstructs and returns decompressed image          |
+| Dashboard UI       | Web-based dual-panel interface (Compress / Decompress)                  |
+| Database           | Stores compression stats (ratio, size, quality, MD5)                    |
 
 ---
 
-### **10. Conclusion**
+### **9. Dry Run Example**
 
-This project successfully combines **mathematical modeling** (DCT, quantization, entropy) with **algorithmic design** (heaps, arrays, RLE) to create an efficient, educationally transparent image compression system.
-It achieves significant storage reduction while retaining acceptable visual quality, demonstrating how **math + DSA** can solve real-world optimization problems.
+| Step            | Description                                   |
+| --------------- | --------------------------------------------- |
+| Input           | `sample1.png` (≈ 5.84 MB)                     |
+| Params          | Quality = 60, Downsample = 2                  |
+| Output File     | `sample1_mc2.mcmp2`                           |
+| Compressed Size | 2.44 MB                                       |
+| Ratio           | **58.2% space saved**                         |
+| PSNR            | ~32.4 dB (good visual quality)                |
+| Reconstruction  | `reconstructed.png` (visually near-identical) |
 
+---
+
+### **10. Mathematical Insight**
+
+This compression model is a hybrid of:
+
+* **Transform-based reduction (DCT + Quantization)** — removes perceptually redundant frequencies.
+* **Entropy-based encoding (Huffman + RLE)** — optimizes bit-length storage.
+* **DSA efficiency** — Heap-based prefix trees + array-based block mapping.
+
+Together, they reduce storage by ~60–80% on average while keeping distortion visually minimal.
+
+---
+
+### **11. Conclusion**
+
+Rapid-Zip demonstrates how **Mathematics (Fourier/DCT transforms)** and **Data Structures (Heap, Arrays, Maps)** can work in unison to solve real-world optimization problems like image compression.
+It achieves high compression with minimal loss — validating the power of **applied math + algorithmic efficiency**.
+
+---
+
+### 🧩 Sample Result Visualization
+
+| File                | Size    | Saved           | Visual Quality    |
+| ------------------- | ------- | --------------- | ----------------- |
+| Original (PNG)      | 5.84 MB | —               | Crisp             |
+| Compressed (.mcmp2) | 2.44 MB | **58% smaller** | Nearly identical  |
+| Decompressed (PNG)  | 5.45 MB | —               | Slightly smoother |

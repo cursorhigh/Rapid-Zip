@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rapid-Zip - Modern Image Compression</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs" defer></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .gradient-border {
+      position: relative;
+      background: linear-gradient(145deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(145deg, rgba(139, 92, 246, 0.5), rgba(59, 130, 246, 0.3));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    
+    .glassmorphism {
+      background: rgba(17, 17, 27, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    
+    .hover-lift {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hover-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+    }
+    
+    .custom-file-input::-webkit-file-upload-button {
+      visibility: hidden;
+    }
+    
+    .custom-file-input::before {
+      content: 'Choose File';
+      display: inline-block;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      color: white;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    
+    .custom-file-input:hover::before {
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+    
+    .loading-shimmer {
+      animation: shimmer 2s infinite;
+      background: linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.3) 50%, rgba(139, 92, 246, 0.1) 100%);
+      background-size: 1000px 100%;
+    }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen overflow-x-hidden">
+  
+  <!-- Background Pattern -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <!-- Top Left -->
+    <div class="absolute top-10 left-10 w-80 h-80 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
+    <!-- Top Right -->
+    <div class="absolute top-10 right-10 w-80 h-80 bg-violet-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
+    <!-- Bottom Left -->
+    <div class="absolute bottom-10 left-10 w-80 h-80 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
+    <!-- Bottom Right -->
+    <div class="absolute bottom-10 right-10 w-80 h-80 bg-purple-700 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
+    <!-- Center -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-violet-700 rounded-full mix-blend-multiply filter blur-3xl opacity-8"></div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="relative z-10 container mx-auto px-4 py-12 max-w-7xl">
+    
+    <!-- Header -->
+    <div class="text-center mb-16">
+      <div class="inline-block mb-4">
+        <div class="flex items-center gap-3 px-6 py-3 glassmorphism rounded-full border border-purple-500/20">
+          <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span class="text-xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">Rapid-Zip</span>
+        </div>
+      </div>
+      <h1 class="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-purple-200 to-violet-200 bg-clip-text text-transparent leading-tight">
+        Modern Image Compression
+      </h1>
+      <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+        Lightning-fast compression with cutting-edge technology. Reduce file sizes without compromising quality.
+      </p>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <!-- ===================== COMPRESSION SECTION ===================== -->
+      <div x-data="compressor()" class="glassmorphism rounded-2xl p-8 hover-lift">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold text-white">Compress</h2>
+            <p class="text-sm text-gray-400">Reduce your image size</p>
+          </div>
+        </div>
+
+        <!-- Upload Form -->
+        <form @submit.prevent="compressImage" enctype="multipart/form-data" class="space-y-5">
+          <!-- File Input -->
+          <div class="relative">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Select Image</label>
+            <input type="file" x-ref="fileInput" accept="image/png,image/jpeg"
+                   class="custom-file-input w-full text-sm text-gray-400
+                          file:mr-4 file:py-3 file:px-6
+                          file:rounded-lg file:border-0
+                          file:text-sm file:font-semibold
+                          file:bg-gradient-to-r file:from-purple-600 file:to-violet-600
+                          file:text-white file:cursor-pointer
+                          hover:file:from-purple-700 hover:file:to-violet-700
+                          file:transition-all file:duration-300" required>
+          </div>
+
+          <!-- Settings Grid -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">Quality</label>
+              <div class="relative">
+                <input type="number" x-model="quality" min="1" max="100"
+                       class="w-full px-4 py-3 bg-gray-900/50 rounded-lg border border-purple-500/20 
+                              text-white text-center font-semibold
+                              focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent
+                              transition-all duration-300">
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">%</span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">Downsample</label>
+              <input type="number" x-model="down" min="1" max="8"
+                     class="w-full px-4 py-3 bg-gray-900/50 rounded-lg border border-purple-500/20 
+                            text-white text-center font-semibold
+                            focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent
+                            transition-all duration-300">
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" :disabled="loading"
+                  class="w-full py-4 rounded-lg font-semibold text-white
+                         bg-gradient-to-r from-purple-600 to-violet-600
+                         hover:from-purple-700 hover:to-violet-700
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         transform transition-all duration-300
+                         hover:scale-[1.02] active:scale-[0.98]
+                         shadow-lg shadow-purple-500/25">
+            <span x-show="!loading" class="flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Compress Image
+            </span>
+            <span x-show="loading" class="flex items-center justify-center gap-2">
+              <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Compressing...
+            </span>
+          </button>
+        </form>
+
+        <!-- Error Message -->
+        <template x-if="error">
+          <div class="mt-5 bg-red-500/10 border border-red-500/30 rounded-lg p-4 backdrop-blur-sm">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-sm text-red-200" x-text="error"></span>
+            </div>
+          </div>
+        </template>
+
+        <!-- Result -->
+        <template x-if="result">
+          <div class="mt-5 bg-gradient-to-br from-purple-500/10 to-violet-500/10 border border-purple-500/20 rounded-xl p-5 backdrop-blur-sm">
+            <div class="flex items-center gap-2 mb-4">
+              <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 class="text-lg font-bold text-white">Success!</h3>
+            </div>
+            
+            <div class="space-y-3 mb-4">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-400">Space Saved</span>
+                <span class="text-lg font-bold text-green-400" x-text="result.stats.saved + '%'"></span>
+              </div>
+              <div class="w-full bg-gray-800/50 rounded-full h-2">
+                <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-500" 
+                     :style="`width: ${result.stats.saved}%`"></div>
+              </div>
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-gray-400">Original: <span class="text-white font-semibold" x-text="formatBytes(result.stats.original_bytes)"></span></span>
+                <span class="text-gray-400">Compressed: <span class="text-purple-400 font-semibold" x-text="formatBytes(result.stats.out_bytes)"></span></span>
+              </div>
+            </div>
+
+            <a :href="result.download_url" download
+               class="flex items-center justify-center gap-2 w-full py-3 rounded-lg font-semibold
+                      bg-gradient-to-r from-green-600 to-emerald-600
+                      hover:from-green-700 hover:to-emerald-700
+                      text-white transition-all duration-300
+                      transform hover:scale-[1.02] active:scale-[0.98]">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download Compressed
+            </a>
+          </div>
+        </template>
+      </div>
+
+    <!-- ===================== DECOMPRESSION SECTION ===================== -->
+    <div x-data="decompressor()" class="glassmorphism rounded-2xl p-8 hover-lift">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-white">Decompress</h2>
+          <p class="text-sm text-gray-400">Restore your image</p>
+        </div>
+      </div>
+
+      <!-- Upload -->
+      <form @submit.prevent="decompressFile" enctype="multipart/form-data" class="space-y-5">
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-300 mb-2">Select Compressed File</label>
+          <input type="file" x-ref="decompFile" accept=".mcmp2"
+                 class="custom-file-input w-full text-sm text-gray-400
+                        file:mr-4 file:py-3 file:px-6
+                        file:rounded-lg file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-gradient-to-r file:from-violet-600 file:to-purple-600
+                        file:text-white file:cursor-pointer
+                        hover:file:from-violet-700 hover:file:to-purple-700
+                        file:transition-all file:duration-300" required>
+        </div>
+
+        <button type="submit" :disabled="loading"
+                class="w-full py-4 rounded-lg font-semibold text-white
+                       bg-gradient-to-r from-violet-600 to-purple-600
+                       hover:from-violet-700 hover:to-purple-700
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       transform transition-all duration-300
+                       hover:scale-[1.02] active:scale-[0.98]
+                       shadow-lg shadow-violet-500/25">
+          <span x-show="!loading" class="flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            Decompress File
+          </span>
+          <span x-show="loading" class="flex items-center justify-center gap-2">
+            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Decompressing...
+          </span>
+        </button>
+      </form>
+
+      <!-- Error Message -->
+      <template x-if="error">
+        <div class="mt-5 bg-red-500/10 border border-red-500/30 rounded-lg p-4 backdrop-blur-sm">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-red-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-sm text-red-200" x-text="error"></span>
+          </div>
+        </div>
+      </template>
+
+      <!-- Preview -->
+      <template x-if="imageUrl">
+        <div class="mt-5 bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-500/20 rounded-xl p-5 backdrop-blur-sm">
+          <div class="flex items-center gap-2 mb-4">
+            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="text-lg font-bold text-white">Image Restored!</h3>
+          </div>
+          
+          <div class="mb-4 rounded-lg overflow-hidden bg-gray-900/50 border border-violet-500/20">
+            <img :src="imageUrl" alt="Reconstructed" class="w-full max-h-[400px] object-contain">
+          </div>
+
+          <a :href="downloadUrl"
+            :download="fileName"
+            class="flex items-center justify-center gap-2 w-full py-3 rounded-lg font-semibold
+                   bg-gradient-to-r from-green-600 to-emerald-600
+                   hover:from-green-700 hover:to-emerald-700
+                   text-white transition-all duration-300
+                   transform hover:scale-[1.02] active:scale-[0.98]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Download Image
+          </a>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- ===================== AlpineJS COMPONENTS ===================== -->
+  <script>
+    function compressor() {
+      return {
+        quality: 60,
+        down: 2,
+        loading: false,
+        result: null,
+        error: null,
+        
+        formatBytes(bytes) {
+          if (bytes === 0) return '0 Bytes';
+          const k = 1024;
+          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+          const i = Math.floor(Math.log(bytes) / Math.log(k));
+          return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        },
+        
+        async compressImage() {
+          const file = this.$refs.fileInput.files[0];
+          if (!file) return;
+          
+          this.loading = true;
+          this.error = null;
+          this.result = null;
+          
+          const form = new FormData();
+          form.append("file", file);
+          form.append("quality", this.quality);
+          form.append("down", this.down);
+
+          try {
+            const res = await fetch("/api/compress/", { method: "POST", body: form });
+            const data = await res.json();
+            
+            if (!res.ok || data.error) {
+              this.error = data.error || "Compression failed";
+              return;
+            }
+
+            this.result = data;
+          } catch (err) {
+            this.error = "Network error: " + err.message;
+          } finally {
+            this.loading = false;
+          }
+        },
+      };
+    }
+
+    function decompressor() {
+      return {
+        loading: false,
+        imageUrl: "",
+        downloadUrl: "",
+        fileName: "",
+        error: null,
+        
+        async decompressFile() {
+          const file = this.$refs.decompFile.files[0];
+          if (!file) return;
+          
+          this.loading = true;
+          this.error = null;
+          this.imageUrl = "";
+          
+          const form = new FormData();
+          form.append("file", file);
+
+          try {
+            const res = await fetch("/api/decompress/", { method: "POST", body: form });
+            
+            if (!res.ok) {
+              const errorData = await res.json();
+              this.error = errorData.error || "Decompression failed";
+              return;
+            }
+            
+            const blob = await res.blob();
+            
+            // Get filename from Content-Disposition header or use default
+            const disposition = res.headers.get('Content-Disposition');
+            this.fileName = disposition 
+              ? disposition.split('filename=')[1].replace(/"/g, '')
+              : file.name.replace('.mcmp2', '_decompressed.png');
+            
+            this.imageUrl = URL.createObjectURL(blob);
+            this.downloadUrl = this.imageUrl;
+            
+          } catch (err) {
+            this.error = "Network error: " + err.message;
+          } finally {
+            this.loading = false;
+          }
+        },
+      };
+    }
+  </script>
+</body>
+</html>
