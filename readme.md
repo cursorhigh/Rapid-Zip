@@ -7,9 +7,8 @@
 
 **🔗 [Visit RapidZip →](https://rapid-zip.onrender.com/)**
 https://rapid-zip.onrender.com/
-
 <div align="center">
-  <img src="image-3.png" alt="RapidZip Screenshot" width="600"/>
+  <img src="https://github.com/user-attachments/assets/424ca467-3e9e-45d1-bb2f-b25b19820569" alt="RapidZip Screenshot" width="600"/>
 </div>
 
 
@@ -23,7 +22,7 @@ High-resolution PNG images contain substantial redundant information, leading to
 ### Our Solution
 A hybrid compression pipeline that intelligently removes perceptually redundant data through:
 - **Transform-based reduction** using Discrete Cosine Transform (DCT)
-![alt text](image-2.png)
+<img width="480" height="360" alt="image" src="https://github.com/user-attachments/assets/6e041bd1-03fb-4d4a-9aeb-97f3986824ea" />
 - **Entropy-based encoding** using Heap-based Huffman Coding
 - **Smart quantization** for controlled quality-to-size tradeoff
 
@@ -31,7 +30,7 @@ A hybrid compression pipeline that intelligently removes perceptually redundant 
 
 ## 🔬 Technical Architecture
 
-![Compression Pipeline](a6726c89-cc40-487f-a89d-5ad865976e01.jpg)
+<img width="2848" height="1600" alt="image" src="https://github.com/user-attachments/assets/d4358129-428a-4c63-9dc3-0912ce0cddf0" />
 
 ### Compression Pipeline
 
