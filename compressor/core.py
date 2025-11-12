@@ -19,6 +19,7 @@ def _idct2(block):
     return idct(idct(block.T, norm='ortho').T, norm='ortho')
 
 # standard JPEG-like 8x8 quant matrix (base)
+# currently not in use as of its for JPG we dont need for PNG
 _Q50 = np.array([
     [16,11,10,16,24,40,51,61],
     [12,12,14,19,26,58,60,55],
@@ -32,15 +33,15 @@ _Q50 = np.array([
 
 # zig-zag order (64 indices)
 _ZIGZAG_IDX = np.array([
- 0, 1, 5, 6,14,15,27,28,
- 2, 4, 7,13,16,26,29,42,
- 3, 8,12,17,25,30,41,43,
- 9,11,18,24,31,40,44,53,
-10,19,23,32,39,45,52,54,
-20,22,33,38,46,51,55,60,
-21,34,37,47,50,56,59,61,
-35,36,48,49,57,58,62,63
-], dtype=np.int32)
+    0, 1, 5, 6,14,15,27,28,
+    2, 4, 7,13,16,26,29,42,
+    3, 8,12,17,25,30,41,43,
+    9,11,18,24,31,40,44,53,
+    10,19,23,32,39,45,52,54,
+    20,22,33,38,46,51,55,60,
+    21,34,37,47,50,56,59,61,
+    35,36,48,49,57,58,62,63
+    ], dtype=np.int32)
 
 _ZIGZAG_POS = np.argsort(_ZIGZAG_IDX)  # index -> (i,j) position via reshape
 
