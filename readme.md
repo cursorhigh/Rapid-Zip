@@ -204,7 +204,4 @@ This project is part of academic research in applied mathematics and data struct
 **Swadhin** ([@cursorhigh](https://github.com/cursorhigh))  
 *Research & Full-Stack Development*
 
-**Anushka** ([@parwal29](https://github.com/parwal29))  
-*Research & Full-Stack Development*
-
 ---
