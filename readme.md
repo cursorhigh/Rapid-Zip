@@ -11,7 +11,9 @@ https://rapid-zip.onrender.com/
   <img src="https://github.com/user-attachments/assets/424ca467-3e9e-45d1-bb2f-b25b19820569" alt="RapidZip Screenshot" width="600"/>
 </div>
 
-
+## 🌐 GitHub Repo
+**🔗 [GitHub @ RapidZip →](https://github.com/cursorhigh/Rapid-Zip)**
+https://github.com/cursorhigh/Rapid-Zip
 ## 🎯 Project Overview
 
 Rapid-Zip is a mathematical image compression system that addresses the challenge of storing high-resolution images efficiently. By combining frequency-domain transforms with entropy encoding, we achieve significant file size reduction while maintaining perceptual image quality.
